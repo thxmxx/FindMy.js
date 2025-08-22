@@ -1,0 +1,28 @@
+{
+  "name": "findmy.js",
+  "version": "1.0.0",
+  "description": "A JavaScript package for interacting with Apple's FindMy service. It handles iCloud authentication (SRP, 2FA), generates FindMy-compatible keys, and fetches/decrypts device location reports. This tool enables users to programmatically access and manage FindMy functionalities, providing insights into device tracking and security.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "FindMy",
+    "Apple",
+    "iCloud",
+    "Bluetooth"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@foxt/js-srp": "^0.0.3-patch2",
+    "asn1.js": "^5.4.1",
+    "axios": "^1.11.0",
+    "elliptic": "^6.6.1",
+    "https-proxy-agent": "^7.0.6",
+    "plist": "^3.1.0",
+    "sqlite3": "^5.1.7",
+    "uuid": "^11.1.0",
+    "xmldom": "^0.6.0"
+  }
+}
