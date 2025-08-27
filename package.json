@@ -1,6 +1,6 @@
 {
   "name": "@thxmxx/findmy.js",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A JavaScript package for interacting with Apple's FindMy service. It handles iCloud authentication (SRP, 2FA), generates FindMy-compatible keys, and fetches/decrypts device location reports. This tool enables users to programmatically access and manage FindMy functionalities, providing insights into device tracking and security.",
   "main": "index.js",
   "scripts": {
