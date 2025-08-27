@@ -184,7 +184,6 @@ async function gsaAuthenticatedRequest(parameters) {
       validateStatus: () => true,
       timeout: 5000,
       responseType: "arraybuffer", // Ensure response is treated as buffer
-      httpsAgent: httpsAgent, // Use the custom HTTPS agent
     }
   );
 
@@ -286,7 +285,6 @@ async function trustedSecondFactor(dsid, idmsToken) {
     headers,
     validateStatus: () => true,
     timeout: 10000,
-    httpsAgent: httpsAgent, // Use the custom HTTPS agent
   });
 
   const code = await prompt("Enter 2FA code: ");
@@ -299,7 +297,6 @@ async function trustedSecondFactor(dsid, idmsToken) {
       headers,
       validateStatus: () => true,
       timeout: 10000,
-      httpsAgent: httpsAgent, // Use the custom HTTPS agent
     }
   );
 
@@ -332,7 +329,6 @@ async function smsSecondFactor(dsid, idmsToken) {
     validateStatus: () => true,
     timeout: 5000,
     responseType: "json", // FIX: Expect a JSON response
-    httpsAgent: httpsAgent, // Use the custom HTTPS agent
   });
 
   const code = await prompt("Enter 2FA code: ");
@@ -346,7 +342,6 @@ async function smsSecondFactor(dsid, idmsToken) {
       validateStatus: () => true,
       timeout: 5000,
       responseType: "json", // FIX: Expect a JSON response
-      httpsAgent: httpsAgent, // Use the custom HTTPS agent
     }
   );
 
