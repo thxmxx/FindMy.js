@@ -26,11 +26,19 @@ function decodeTag(data) {
   return { lat: latitude, lon: longitude, conf: confidence, status: status };
 }
 
-async function getAuth(regenerate = false, second_factor = "sms") {
+async function getAuth(
+  regenerate = false,
+  second_factor = "sms",
+  username,
+  password
+) {
   const configPath = path.join(__dirname, "auth.json");
   if (fs.existsSync(configPath) && !regenerate) {
     return JSON.parse(fs.readFileSync(configPath, "utf8"));
   } else {
+    if (!username || !password) {
+      throw new Error("Username and password are required");
+    }
     const mobileme = await icloudLoginMobileme(
       username,
       password,
