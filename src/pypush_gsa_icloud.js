@@ -16,13 +16,12 @@ const axios = require("axios");
 const { Buffer } = require("buffer"); // Polyfill for Buffer in browser environments if needed
 const https = require("https");
 
-// Create a custom HTTPS agent with a specific cipher suite
-const httpsAgent = new https.Agent({
-  secureProtocol: "TLSv1_2_method", // This forces Node.js to use TLS 1.2 or a newer version
-});
-
 const axiosInstance = axios.create({
   responseType: "arraybuffer", // Set default responseType to arraybuffer
+  httpsAgent: new https.Agent({
+    secureProtocol: "TLSv1_2_method", // This forces Node.js to use TLS 1.2 or a newer version
+    rejectUnauthorized: false,
+  }),
 });
 
 // Configure SRP library for compatibility with Apple's implementation
