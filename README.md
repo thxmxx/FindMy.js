@@ -28,31 +28,12 @@ To get started with FindMy.js, ensure you have Node.js and npm installed on your
 
 3. **Anisette Server**: This project requires an Anisette server to function correctly. You can set up your own using a project like [`Dadoum/anisette-v3-server`](https://github.com/Dadoum/anisette-v3-server) or similar.
 
-   The Anisette server URL can be configured in two ways, with the following precedence:
-   - **Function Parameter**: Pass the `anisetteUrl` directly as a parameter to the `icloudLoginMobileme` function.
-   - **Environment Variable**: Set the `ANISETTE_URL` environment variable.
-   - **Default**: If neither of the above is provided, it defaults to `http://localhost:6969`.
+   The Anisette server URL can be configured using the `ANISETTE_URL` environment variable. If this variable is not set, it defaults to `http://localhost:6969`.
 
    Example of setting via environment variable:
    ```bash
    export ANISETTE_URL="http://your-custom-anisette-server:6969"
    node your_script.js
-   ```
-
-   Example of passing as a function parameter:
-   ```javascript
-   const { icloudLoginMobileme } = require('./src/pypush_gsa_icloud');
-
-   async function authenticate() {
-       try {
-           const authData = await icloudLoginMobileme('your_apple_id', 'your_password', 'sms', 'http://your-custom-anisette-server:6969');
-           console.log('Authentication successful:', authData);
-       } catch (error) {
-           console.error('Authentication failed:', error.message);
-       }
-   }
-
-   authenticate();
    ```
 
 ## Usage

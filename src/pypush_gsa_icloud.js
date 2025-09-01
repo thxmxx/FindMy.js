@@ -32,8 +32,7 @@ const DEVICE_ID = uuidv4();
 async function icloudLoginMobileme(
   username = "",
   password = "",
-  second_factor = "sms",
-  anisetteUrl = undefined
+  second_factor = "sms"
 ) {
   if (!username) {
     username = await prompt("Apple ID: ");
@@ -42,16 +41,11 @@ async function icloudLoginMobileme(
     password = await prompt("Password: ", { echo: false });
   }
 
-  const g = await gsaAuthenticate(
-    username,
-    password,
-    second_factor,
-    anisetteUrl
-  );
+  const g = await gsaAuthenticate(username, password, second_factor);
   const pet = g.t["com.apple.gs.idms.pet"].token;
   const adsid = g.adsid;
 
-  const { anisetteData } = await generateAnisetteHeaders(anisetteUrl);
+  const { anisetteData } = await generateAnisetteHeaders();
 
   const data = {
     "apple-id": username,
@@ -149,20 +143,12 @@ async function gsaAuthenticate(username, password, second_factor = "sms") {
       }
     }
     if (second_factor === "sms") {
-      await smsSecondFactor(
-        parsedSpd.adsid,
-        parsedSpd.GsIdmsToken,
-        anisetteUrl
-      );
+      await smsSecondFactor(parsedSpd.adsid, parsedSpd.GsIdmsToken);
     } else if (second_factor === "trusted_device") {
-      await trustedSecondFactor(
-        parsedSpd.adsid,
-        parsedSpd.GsIdmsToken,
-        anisetteUrl
-      );
+      await trustedSecondFactor(parsedSpd.adsid, parsedSpd.GsIdmsToken);
     }
     // After 2FA is complete, re-run the entire authentication flow.
-    return gsaAuthenticate(username, password, second_factor, anisetteUrl);
+    return gsaAuthenticate(username, password, second_factor);
   } else {
     // CASE 2: No 'au' key is present. This is a SUCCESS.
     // Return the parsed session data.
@@ -170,8 +156,8 @@ async function gsaAuthenticate(username, password, second_factor = "sms") {
   }
 }
 
-async function gsaAuthenticatedRequest(parameters, anisetteUrl = undefined) {
-  const { anisetteData } = await generateAnisetteHeaders(anisetteUrl);
+async function gsaAuthenticatedRequest(parameters) {
+  const { anisetteData } = await generateAnisetteHeaders();
 
   const body = {
     Header: { Version: "1.0.1" },
@@ -281,10 +267,10 @@ function decryptCbc(usr, data) {
   return decrypted;
 }
 
-async function trustedSecondFactor(dsid, idmsToken, anisetteUrl = undefined) {
+async function trustedSecondFactor(dsid, idmsToken) {
   const identityToken = Buffer.from(`${dsid}:${idmsToken}`).toString("base64");
 
-  const { anisetteData } = await generateAnisetteHeaders(anisetteUrl);
+  const { anisetteData } = await generateAnisetteHeaders();
 
   const headers = {
     Accept: "application/json, text/javascript, */*", // FIX: Correct Accept header
@@ -321,10 +307,10 @@ async function trustedSecondFactor(dsid, idmsToken, anisetteUrl = undefined) {
   }
 }
 
-async function smsSecondFactor(dsid, idmsToken, anisetteUrl = undefined) {
+async function smsSecondFactor(dsid, idmsToken) {
   const identityToken = Buffer.from(`${dsid}:${idmsToken}`).toString("base64");
 
-  const { anisetteData } = await generateAnisetteHeaders(anisetteUrl);
+  const { anisetteData } = await generateAnisetteHeaders();
 
   const headers = {
     "Content-Type": "application/json", // FIX: Set correct Content-Type
