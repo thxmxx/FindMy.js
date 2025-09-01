@@ -26,15 +26,14 @@ const axiosInstance = axios.create({
 
 // Configure SRP library for compatibility with Apple's implementation
 
-const ANISETTE_URL = "http://localhost:6969"; // https://github.com/Dadoum/anisette-v3-server
-
 const USER_ID = uuidv4();
 const DEVICE_ID = uuidv4();
 
 async function icloudLoginMobileme(
   username = "",
   password = "",
-  second_factor = "sms"
+  second_factor = "sms",
+  anisetteUrl = undefined
 ) {
   if (!username) {
     username = await prompt("Apple ID: ");
@@ -43,11 +42,16 @@ async function icloudLoginMobileme(
     password = await prompt("Password: ", { echo: false });
   }
 
-  const g = await gsaAuthenticate(username, password, second_factor);
+  const g = await gsaAuthenticate(
+    username,
+    password,
+    second_factor,
+    anisetteUrl
+  );
   const pet = g.t["com.apple.gs.idms.pet"].token;
   const adsid = g.adsid;
 
-  const { anisetteData } = await generateAnisetteHeaders();
+  const { anisetteData } = await generateAnisetteHeaders(anisetteUrl);
 
   const data = {
     "apple-id": username,
@@ -145,12 +149,20 @@ async function gsaAuthenticate(username, password, second_factor = "sms") {
       }
     }
     if (second_factor === "sms") {
-      await smsSecondFactor(parsedSpd.adsid, parsedSpd.GsIdmsToken);
+      await smsSecondFactor(
+        parsedSpd.adsid,
+        parsedSpd.GsIdmsToken,
+        anisetteUrl
+      );
     } else if (second_factor === "trusted_device") {
-      await trustedSecondFactor(parsedSpd.adsid, parsedSpd.GsIdmsToken);
+      await trustedSecondFactor(
+        parsedSpd.adsid,
+        parsedSpd.GsIdmsToken,
+        anisetteUrl
+      );
     }
     // After 2FA is complete, re-run the entire authentication flow.
-    return gsaAuthenticate(username, password);
+    return gsaAuthenticate(username, password, second_factor, anisetteUrl);
   } else {
     // CASE 2: No 'au' key is present. This is a SUCCESS.
     // Return the parsed session data.
@@ -158,8 +170,8 @@ async function gsaAuthenticate(username, password, second_factor = "sms") {
   }
 }
 
-async function gsaAuthenticatedRequest(parameters) {
-  const { anisetteData } = await generateAnisetteHeaders();
+async function gsaAuthenticatedRequest(parameters, anisetteUrl = undefined) {
+  const { anisetteData } = await generateAnisetteHeaders(anisetteUrl);
 
   const body = {
     Header: { Version: "1.0.1" },
@@ -214,9 +226,11 @@ async function generateCpd(anisetteData) {
   return cpd;
 }
 
-async function generateAnisetteHeaders() {
+async function generateAnisetteHeaders(anisetteUrl = undefined) {
+  const AN_URL =
+    anisetteUrl || process.env.ANISETTE_URL || "http://localhost:6969";
   try {
-    const response = await axios.get(ANISETTE_URL, {
+    const response = await axios.get(AN_URL, {
       timeout: 5000,
       responseType: "json",
     });
@@ -226,7 +240,7 @@ async function generateAnisetteHeaders() {
     return { anisetteData };
   } catch (e) {
     console.error(
-      `Failed to query anisette server at ${ANISETTE_URL}. Please ensure it's running.`
+      `Failed to query anisette server at ${AN_URL}. Please ensure it's running.`
     );
     // It's better to throw an error here than to continue with an invalid request
     throw new Error("Anisette server is unavailable.");
@@ -267,10 +281,10 @@ function decryptCbc(usr, data) {
   return decrypted;
 }
 
-async function trustedSecondFactor(dsid, idmsToken) {
+async function trustedSecondFactor(dsid, idmsToken, anisetteUrl = undefined) {
   const identityToken = Buffer.from(`${dsid}:${idmsToken}`).toString("base64");
 
-  const { anisetteData } = await generateAnisetteHeaders();
+  const { anisetteData } = await generateAnisetteHeaders(anisetteUrl);
 
   const headers = {
     Accept: "application/json, text/javascript, */*", // FIX: Correct Accept header
@@ -307,10 +321,10 @@ async function trustedSecondFactor(dsid, idmsToken) {
   }
 }
 
-async function smsSecondFactor(dsid, idmsToken) {
+async function smsSecondFactor(dsid, idmsToken, anisetteUrl = undefined) {
   const identityToken = Buffer.from(`${dsid}:${idmsToken}`).toString("base64");
 
-  const { anisetteData } = await generateAnisetteHeaders();
+  const { anisetteData } = await generateAnisetteHeaders(anisetteUrl);
 
   const headers = {
     "Content-Type": "application/json", // FIX: Set correct Content-Type
