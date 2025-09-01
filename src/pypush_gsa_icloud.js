@@ -325,7 +325,7 @@ async function smsSecondFactor(dsid, idmsToken) {
   const body = { phoneNumber: { id: 1 }, mode: "sms" };
 
   try {
-    const response = await axiosInstance.put(
+    const response = await axiosInstance.post(
       "https://gsa.apple.com/auth/verify/phone/",
       body,
       {
@@ -337,7 +337,7 @@ async function smsSecondFactor(dsid, idmsToken) {
     );
     console.log("SMS 2FA request response status:", response.status);
     console.log("SMS 2FA request response data:", response.data);
-    if (response.status !== 200) {
+    if (response.status !== 200 && response.status !== 201) {
       console.error(
         "Failed to request SMS 2FA code:",
         response.status,
