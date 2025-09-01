@@ -324,12 +324,31 @@ async function smsSecondFactor(dsid, idmsToken) {
 
   const body = { phoneNumber: { id: 1 }, mode: "sms" };
 
-  await axiosInstance.put("https://gsa.apple.com/auth/verify/phone/", body, {
-    headers,
-    validateStatus: () => true,
-    timeout: 5000,
-    responseType: "json", // FIX: Expect a JSON response
-  });
+  try {
+    const response = await axiosInstance.put(
+      "https://gsa.apple.com/auth/verify/phone/",
+      body,
+      {
+        headers,
+        validateStatus: () => true,
+        timeout: 5000,
+        responseType: "json", // Expect a JSON response
+      }
+    );
+    console.log("SMS 2FA request response status:", response.status);
+    console.log("SMS 2FA request response data:", response.data);
+    if (response.status !== 200) {
+      console.error(
+        "Failed to request SMS 2FA code:",
+        response.status,
+        response.data
+      );
+      throw new Error("Failed to request SMS 2FA code.");
+    }
+  } catch (error) {
+    console.error("Error requesting SMS 2FA code:", error.message);
+    throw error;
+  }
 
   const code = await prompt("Enter 2FA code: ");
   body.securityCode = { code };
