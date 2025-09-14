@@ -118,35 +118,33 @@ async function requestReports(
 
     const timestamp = dataPayload.readUInt32BE(0) + 978307200;
 
-    if (timestamp >= startDate) {
-      const ephKeyHex = dataPayload.slice(5, 62).toString("hex");
-      const ecdh = crypto.createECDH("secp224r1");
-      ecdh.setPrivateKey(Buffer.from(priv.toString(16), "hex"));
-      const ephemeralPublicKeyBuffer = Buffer.from(ephKeyHex, "hex");
-      const sharedKey = ecdh.computeSecret(ephemeralPublicKeyBuffer);
+    const ephKeyHex = dataPayload.slice(5, 62).toString("hex");
+    const ecdh = crypto.createECDH("secp224r1");
+    ecdh.setPrivateKey(Buffer.from(priv.toString(16), "hex"));
+    const ephemeralPublicKeyBuffer = Buffer.from(ephKeyHex, "hex");
+    const sharedKey = ecdh.computeSecret(ephemeralPublicKeyBuffer);
 
-      const symmetricKey = sha256(
-        Buffer.concat([
-          sharedKey,
-          Buffer.from([0, 0, 0, 1]),
-          dataPayload.slice(5, 62),
-        ])
-      );
+    const symmetricKey = sha256(
+      Buffer.concat([
+        sharedKey,
+        Buffer.from([0, 0, 0, 1]),
+        dataPayload.slice(5, 62),
+      ])
+    );
 
-      const decryptionKey = symmetricKey.slice(0, 16);
-      const iv = symmetricKey.slice(16);
-      const encData = dataPayload.slice(62, 72);
-      const tag = dataPayload.slice(72);
+    const decryptionKey = symmetricKey.slice(0, 16);
+    const iv = symmetricKey.slice(16);
+    const encData = dataPayload.slice(62, 72);
+    const tag = dataPayload.slice(72);
 
-      const decrypted = decrypt(encData, decryptionKey, iv, tag);
-      const decodedTag = decodeTag(decrypted);
-      decodedTag.timestamp = timestamp;
-      decodedTag.isodatetime = new Date(timestamp * 1000).toISOString();
-      decodedTag.key = keys.hashed_adv_public_key;
-      decodedTag.goog = `https://maps.google.com/maps?q=${decodedTag.lat},${decodedTag.lon}`;
-      found.add(decodedTag.key);
-      ordered.push(decodedTag);
-    }
+    const decrypted = decrypt(encData, decryptionKey, iv, tag);
+    const decodedTag = decodeTag(decrypted);
+    decodedTag.timestamp = timestamp;
+    decodedTag.isodatetime = new Date(timestamp * 1000).toISOString();
+    decodedTag.key = keys.hashed_adv_public_key;
+    decodedTag.goog = `https://maps.google.com/maps?q=${decodedTag.lat},${decodedTag.lon}`;
+    found.add(decodedTag.key);
+    ordered.push(decodedTag);
   }
   ordered.sort((a, b) => a.timestamp - b.timestamp);
   return ordered;
