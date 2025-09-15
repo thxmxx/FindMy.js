@@ -32,7 +32,7 @@ async function getAuth(
   username,
   password
 ) {
-  const configPath = path.join(__dirname, "auth.json");
+  const configPath = path.join(process.cwd(), "auth.json");
   if (fs.existsSync(configPath) && !regenerate) {
     return JSON.parse(fs.readFileSync(configPath, "utf8"));
   } else {

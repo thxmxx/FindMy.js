@@ -335,18 +335,10 @@ async function smsSecondFactor(dsid, idmsToken) {
         responseType: "json", // Expect a JSON response
       }
     );
-    console.log("SMS 2FA request response status:", response.status);
-    console.log("SMS 2FA request response data:", response.data);
     if (response.status !== 200 && response.status !== 201) {
-      console.error(
-        "Failed to request SMS 2FA code:",
-        response.status,
-        response.data
-      );
       throw new Error("Failed to request SMS 2FA code.");
     }
   } catch (error) {
-    console.error("Error requesting SMS 2FA code:", error.message);
     throw error;
   }
 
