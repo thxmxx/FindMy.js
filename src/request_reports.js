@@ -26,12 +26,27 @@ function decodeTag(data) {
   return { lat: latitude, lon: longitude, conf: confidence, status: status };
 }
 
+/**
+ * Gets authentication data from various sources
+ * @param {boolean} regenerate - Whether to regenerate auth from iCloud
+ * @param {string} second_factor - 2FA method ("sms" or "trusted_device")
+ * @param {string} username - iCloud username
+ * @param {string} password - iCloud password
+ * @param {Object} authObject - Pre-existing auth object with dsid and searchPartyToken
+ * @returns {Object} Authentication object with dsid and searchPartyToken
+ */
 async function getAuth(
   regenerate = false,
   second_factor = "sms",
   username,
-  password
+  password,
+  authObject = null
 ) {
+  // If auth object is provided, use it directly
+  if (authObject && typeof authObject === 'object' && authObject.dsid && authObject.searchPartyToken) {
+    return authObject;
+  }
+
   const configPath = path.join(process.cwd(), "auth.json");
   if (fs.existsSync(configPath) && !regenerate) {
     return JSON.parse(fs.readFileSync(configPath, "utf8"));
@@ -55,13 +70,25 @@ async function getAuth(
   }
 }
 
+/**
+ * Requests FindMy location reports for a device
+ * @param {string} pKey - Base64 encoded private key
+ * @param {number} hours - Number of hours to look back (default: 24)
+ * @param {string} username - iCloud username (optional if using authObject or saved auth)
+ * @param {string} password - iCloud password (optional if using authObject or saved auth)
+ * @param {boolean} regen - Whether to regenerate authentication (default: false)
+ * @param {boolean} trustedDevice - Whether to use trusted device for 2FA (default: false)
+ * @param {Object} authObject - Pre-existing auth object with dsid and searchPartyToken (optional)
+ * @returns {Array} Array of location reports with timestamps and coordinates
+ */
 async function requestReports(
   pKey,
   hours = 24,
   username = undefined,
   password = undefined,
   regen = false,
-  trustedDevice = false
+  trustedDevice = false,
+  authObject = null
 ) {
   const keys = await getFindMyDataFromPrivateKey(pKey);
   const unixEpoch = Math.floor(Date.now() / 1000);
@@ -80,7 +107,8 @@ async function requestReports(
     regen,
     trustedDevice ? "trusted_device" : "sms",
     username,
-    password
+    password,
+    authObject
   );
   const dsid = auth.dsid;
   const searchPartyToken = auth.searchPartyToken;
@@ -154,7 +182,22 @@ async function requestReports(
 
 if (require.main === module) {
   // Example usage:
-  // requestReports(24, '', false, false); // Request reports for the last 24 hours, no prefix, no regen, no trusted device
+  
+  // Method 1: Using saved auth.json file (existing behavior)
+  // requestReports('YOUR_PRIVATE_KEY_BASE64', 24);
+  
+  // Method 2: Using username/password (existing behavior)
+  // requestReports('YOUR_PRIVATE_KEY_BASE64', 24, 'username', 'password');
+  
+  // Method 3: Using auth object (NEW FEATURE)
+  // const authObject = {
+  //   dsid: 'your_dsid_here',
+  //   searchPartyToken: 'your_search_party_token_here'
+  // };
+  // requestReports('YOUR_PRIVATE_KEY_BASE64', 24, undefined, undefined, false, false, authObject);
+  
+  // Method 4: Shorter syntax for auth object
+  // requestReports('YOUR_PRIVATE_KEY_BASE64', 24, null, null, false, false, authObject);
 }
 
 module.exports = { requestReports };

@@ -81,7 +81,14 @@ function generateFindMyData(
     }
 }
 
-async function generateKeys(nkeys = 1, prefix = '') { // yamlFile is no longer used
+/**
+ * Generates FindMy keys with customizable starting serial number
+ * @param {number} nkeys - Number of keys to generate (default: 1)
+ * @param {string} prefix - Prefix filter for hashed public key (default: '')
+ * @param {number} startFrom - Starting serial number for generated keys (default: 1)
+ * @returns {Array} Array of generated key objects with SN, MAC, FF, hashed_adv_public_key, private_key, public_key
+ */
+async function generateKeys(nkeys = 1, prefix = '', startFrom = 1) {
     const generatedKeys = [];
     let attempts = 0;
     while (generatedKeys.length < nkeys && attempts < nkeys * 1000) { // Add a limit to attempts
@@ -115,7 +122,7 @@ async function generateKeys(nkeys = 1, prefix = '') { // yamlFile is no longer u
             // No file writing here
             const { macAddress, ffPayload } = generateFindMyData(advB64);
             const keyData = {
-                SN: (generatedKeys.length + 1).toString(),
+                SN: (startFrom + generatedKeys.length).toString(),
                 MAC: macAddress.replace(/:/g, ""),
                 FF: ffPayload,
                 hashed_adv_public_key: s256B64,
