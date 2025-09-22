@@ -4,6 +4,20 @@
   "description": "A JavaScript package for interacting with Apple's FindMy service. It handles iCloud authentication (SRP, 2FA), generates FindMy-compatible keys, and fetches/decrypts device location reports. This tool enables users to programmatically access and manage FindMy functionalities, providing insights into device tracking and security.",
   "main": "index.js",
   "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./index.js",
+      "types": "./index.d.ts"
+    }
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
