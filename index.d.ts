@@ -1,128 +1,94 @@
 declare module "@thxmxx/findmy.js" {
-  export interface ICloudLoginResponse {
-    dsInfo: {
-      lastName: string;
-      iCloudEnv: {
-        "upload-endpoint": string;
-        "search-part-token": string;
-        "ck-auth-token": string;
-        "instance-id": string;
-        "search-url": string;
-        "pcs-service-url": string;
-        "download-endpoint": string;
-        "ck-app-token": string;
-        "container-id": string;
-        "sharing-url": string;
-        "production-url": string;
-        "ck-web-auth-token": string;
-        "is-custom-environment": boolean;
-      };
-      hasICloudQualifyingDevice: boolean;
-      primaryEmailVerified: boolean;
-      appleId: string;
-      primaryEmail: string;
-      "X-APPLE-WEBAUTH-USER": string;
-      "X-APPLE-WEBAUTH-PW": string;
-      "X-APPLE-WEBAUTH-TOKEN": string;
-      dsid: string;
-      fullName: string;
-      firstName: string;
-      appleIdAliases: string[];
-      languageCode: string;
-      familyEligible: boolean;
-      hasPaymentInfo: boolean;
-      appleIdCountry: string;
-      isManagedAppleId: boolean;
-      aDsID: string;
-      notificationId: string;
-      isPaidDeveloper: boolean;
-      countryCode: string;
-      locked: boolean;
-    };
-    webservices: {
-      [key: string]: {
-        url: string;
-        status: string;
-      };
-    };
-    hsaVersion: number;
-    isExtendedLogin: boolean;
-    hsaChallengeRequired: boolean;
-    "x-apple-id-session-id": string;
-    "x-apple-mm-session-id": string;
-
-    requestInfo: {
-      country: string;
-      "time-zone": string;
-      region: string;
-    };
-    "has-icloud-plus": boolean;
-    hsaTrustedBrowser: boolean;
-    apps: any[];
-    pcsEnabled: boolean;
-    "is-icloud-plus-user": boolean;
-    "apple-id-features": {
-      "is-child-account": boolean;
-      "is-legacy-student": boolean;
-      "has-parental-controls": boolean;
-    };
-    "x-apple-mm-data": string;
-    authType: string;
-    trustedDevice: any;
-  }
-
-  export interface AnisetteHeaders {
-    "X-Apple-I-Client-Time": string;
-    "X-Apple-I-TimeZone": string;
-    "X-Apple-I-Request-Key": string;
-    "X-Apple-I-MD-M": string;
-    "X-Apple-I-MD-RINFO": string;
-    "X-Apple-I-MD": string;
-  }
-
-  export interface Report {
-    name: string;
-    id: string;
-    modelDisplayName: string;
-    location: {
-      latitude: number;
-      longitude: number;
-      timeStamp: number;
-    };
+  export interface KeyData {
+    SN: string;
+    MAC: string;
+    FF: string;
+    hashed_adv_public_key: string;
+    private_key: string;
+    public_key: string;
   }
 
   export interface FindMyData {
-    advKey: string;
-    content: Report[];
-    date: string;
-    id: string;
-    statusCode: string;
+    public_key: string;
+    MAC: string;
+    FF: string;
+    hashed_adv_public_key: string;
   }
 
-  export interface Keys {
-    privateKey: string;
-    publicKey: string;
-    hashedPublicKey: string;
+  export interface ICloudAuth {
+    dsid: string;
+    delegates: {
+      "com.apple.mobileme": {
+        "service-data": {
+          tokens: {
+            searchPartyToken: string;
+          };
+        };
+      };
+    };
+    // Other properties may exist
   }
 
-  export function generateKeys(): Keys;
+  export interface AnisetteData {
+    "X-Apple-I-Client-Time": string;
+    "X-Apple-I-TimeZone": string;
+    "X-Apple-Locale": string;
+    "X-Apple-I-MD": string;
+    "X-Apple-I-MD-M": string;
+    "X-Apple-I-MD-RINFO": string;
+    "X-Apple-I-SRL-NO": string;
+    "X-Mme-Device-Id": string;
+    // Other properties may exist
+  }
+
+  export interface AuthObject {
+    dsid: string;
+    searchPartyToken: string;
+  }
+
+  export interface LocationReport {
+    lat: number;
+    lon: number;
+    conf: number;
+    status: number;
+    timestamp: number;
+    isodatetime: string;
+    key: string;
+    goog: string;
+  }
+
+  export function generateKeys(
+    nkeys?: number,
+    prefix?: string,
+    startFrom?: number
+  ): Promise<KeyData[]>;
+
+  export function getFindMyDataFromPrivateKey(
+    privateKeyB64: string
+  ): Promise<FindMyData | null>;
 
   export function icloudLoginMobileme(
-    apple_id: string,
-    password: string
-  ): Promise<ICloudLoginResponse>;
+    username?: string,
+    password?: string,
+    second_factor?: "sms" | "trusted_device"
+  ): Promise<ICloudAuth>;
 
-  export function generateAnisetteHeaders(): Promise<AnisetteHeaders>;
+  export function generateAnisetteHeaders(
+    anisetteUrl?: string
+  ): Promise<{ anisetteData: AnisetteData }>;
 
   export function requestReports(
-    dsid: string,
-    xAppleIdSessionId: string,
-    xAppleMmSessionId: string
-  ): Promise<FindMyData>;
+    pKey: string,
+    hours?: number,
+    username?: string,
+    password?: string,
+    regen?: boolean,
+    trustedDevice?: boolean,
+    authObject?: AuthObject | null
+  ): Promise<LocationReport[]>;
 
-  export function getFindMyDataFromPrivateKey(privateKey: string): Promise<{
-    advertisementKey: string;
-    hashedPublicKey: string;
-    publicKey: string;
-  }>;
+  export function requestReports(
+    pKey: string,
+    authObject: AuthObject
+  ): Promise<LocationReport[]>;
 }

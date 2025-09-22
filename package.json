@@ -4,8 +4,15 @@
   "description": "A JavaScript package for interacting with Apple's FindMy service. It handles iCloud authentication (SRP, 2FA), generates FindMy-compatible keys, and fetches/decrypts device location reports. This tool enables users to programmatically access and manage FindMy functionalities, providing insights into device tracking and security.",
   "main": "index.js",
   "types": "index.d.ts",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified yet\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thxmxx/FindMy.js.git"
   },
   "keywords": [
     "FindMy",
@@ -13,8 +20,12 @@
     "iCloud",
     "Bluetooth"
   ],
-  "author": "",
+  "author": "thxmxx",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thxmxx/FindMy.js/issues"
+  },
+  "homepage": "https://github.com/thxmxx/FindMy.js#readme",
   "dependencies": {
     "@foxt/js-srp": "^0.0.3-patch2",
     "asn1.js": "^5.4.1",

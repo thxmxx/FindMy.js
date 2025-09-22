@@ -43,7 +43,12 @@ async function getAuth(
   authObject = null
 ) {
   // If auth object is provided, use it directly
-  if (authObject && typeof authObject === 'object' && authObject.dsid && authObject.searchPartyToken) {
+  if (
+    authObject &&
+    typeof authObject === "object" &&
+    authObject.dsid &&
+    authObject.searchPartyToken
+  ) {
     return authObject;
   }
 
@@ -68,6 +73,18 @@ async function getAuth(
     fs.writeFileSync(configPath, JSON.stringify(j));
     return j;
   }
+}
+
+async function requestReports(pKey, authObject) {
+  return requestReports(
+    pKey,
+    24,
+    undefined,
+    undefined,
+    false,
+    false,
+    authObject
+  );
 }
 
 /**
@@ -182,20 +199,16 @@ async function requestReports(
 
 if (require.main === module) {
   // Example usage:
-  
   // Method 1: Using saved auth.json file (existing behavior)
   // requestReports('YOUR_PRIVATE_KEY_BASE64', 24);
-  
   // Method 2: Using username/password (existing behavior)
   // requestReports('YOUR_PRIVATE_KEY_BASE64', 24, 'username', 'password');
-  
   // Method 3: Using auth object (NEW FEATURE)
   // const authObject = {
   //   dsid: 'your_dsid_here',
   //   searchPartyToken: 'your_search_party_token_here'
   // };
   // requestReports('YOUR_PRIVATE_KEY_BASE64', 24, undefined, undefined, false, false, authObject);
-  
   // Method 4: Shorter syntax for auth object
   // requestReports('YOUR_PRIVATE_KEY_BASE64', 24, null, null, false, false, authObject);
 }
